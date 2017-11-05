@@ -1,0 +1,40 @@
+import httplib2
+import os
+import io
+from googleapiclient import discovery
+from googleapiclient.http import MediaIoBaseDownload 
+from oauth2client import client
+from oauth2client.service_account import ServiceAccountCredentials
+
+### More information can be found here: https://developers.google.com/drive/v3/web/quickstart/python#step_3_set_up_the_sample 
+
+#Using a GDrive file ID to export the file.
+
+def CopyCurrentMonthToTemporarySheet(File_ID):
+    #If you need a specific sheet.
+    # 1. Open the file.
+    # 2. Copy that sheet to a new file.
+    # 3. Fetch new_File_ID
+    # download_sheet_pdf(new_File_ID)
+
+def download_sheet_pdf(File_ID):
+    #Set the file ID, you will find it in the URL to the spreadsheet.
+    file_id = 'xxx'
+    
+    flags = None
+    scope = ['https://www.googleapis.com/auth/drive.readonly']
+
+    creds = ServiceAccountCredentials.from_json_keyfile_name('client_secret.json', scope)
+
+    http = creds.authorize(httplib2.Http())
+
+    service = discovery.build('drive', 'v3', http=http)
+    request = service.files().export_media(fileId=file_id,
+                                                 mimeType='application/pdf')
+    fh = io.FileIO("filename.pdf", 'wb')
+    downloader = MediaIoBaseDownload(fh, request)
+    done = False
+    while done is False:
+        status, done = downloader.next_chunk()
+        #print "Download %d%%." % int(status.progress() * 100)
+    #You might need to close the fh-handle.
